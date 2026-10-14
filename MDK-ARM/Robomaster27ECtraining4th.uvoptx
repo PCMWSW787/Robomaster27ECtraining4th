@@ -158,17 +158,12 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>test_motor_id1</ItemText>
+          <ItemText>rx_header</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rx_header</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>test_amperes</ItemText>
+          <ItemText>tx_data</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

@@ -11,7 +11,8 @@ extern CAN_TxHeaderTypeDef tx_header2;
 Motor::Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id)
     :ratio_(ratio),
     spid_(spid),
-    ppid_(ppid)
+    ppid_(ppid),
+    motor_id_(motor_id)
 {}
 
 float Motor::angle() const
@@ -51,7 +52,7 @@ void Motor::normalizeDataReceived()
 void Motor::canRxMsgCallback(const uint8_t rx_data[8])
 {
     ecd_angle_ = static_cast<int16_t>((static_cast<uint16_t>(rx_data[0]) << 8) | static_cast<uint16_t>(rx_data[1]));
-    speed_rpm_ = static_cast<int16_t>((static_cast<uint16_t>(rx_data[2]) << 8) | static_cast<uint16_t>(rx_data[3]));
+    speed_rpm_ = static_cast<int16_t>((static_cast<uint16_t>(rx_data[2]) << 8) | static_cast<uint16_t>(rx_data[3])) / ratio_;
     // int16_t rx_raw_current = static_cast<int16_t>(static_cast<uint16_t>(rx_data[4]) << 8 | (static_cast<uint16_t>(rx_data[5])));
     // currentA_ = static_cast<float>(rx_raw_current) * 10.0f / 10000.0f;
     // tempC_ = static_cast<int16_t>(rx_data[6]);
@@ -112,6 +113,8 @@ void Motor::setTxCurrent(float amperes, uint8_t motor_id)
 
 void Motor::handle()
 {
+    fdb_angle_ = angle_;
+    fdb_speed_ = speed_rpm_;
     target_speed_ = ppid_.calc(target_angle_,angle_);
     float out_current = spid_.calc(target_speed_,speed_rpm_);
     setTxCurrent(out_current, motor_id_);

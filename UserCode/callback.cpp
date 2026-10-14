@@ -10,10 +10,10 @@
 #include "Motor.hpp"
 #include "tim.h"
 
-PID ppid(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-PID spid(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+PID ppid(20.0f, 0.0f, 1.0f, 100.0f, 100.0f, 0.4f);
+PID spid(0.6f, 0.0f, 0.3f, 0.0f, 10000.0f, 0.2f);
 
-Motor motor1(36.0f, ppid, spid, 4);
+Motor motor1(36.0f, spid, ppid, 4);
 uint8_t tx_data[8] = {};
 
 float test_amperes = 0.0f;
