@@ -8,12 +8,16 @@ extern CAN_TxHeaderTypeDef tx_header;
 extern CAN_TxHeaderTypeDef tx_header1;
 extern CAN_TxHeaderTypeDef tx_header2;
 
-Motor::Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id)
+Motor::Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id, ControlMethod control_method, MotorType motor_type)
     :ratio_(ratio),
     spid_(spid),
     ppid_(ppid),
-    motor_id_(motor_id)
-{}
+    motor_id_(motor_id),
+    control_method_(control_method),
+    motor_type_(motor_type)
+{
+    this->setTarget(0.0f, 0.0f, 0.0f);
+}
 
 float Motor::angle() const
 {
@@ -58,6 +62,13 @@ void Motor::canRxMsgCallback(const uint8_t rx_data[8])
     fdb_current_amps = static_cast<float>(rx_raw_current) * 10.0f / 10000.0f;
     tempC_ = static_cast<int16_t>(rx_data[6]);
     normalizeDataReceived();
+}
+
+void Motor::setTarget(float target_position_deg, float target_speed_rpm, float target_intensity_amps)
+{
+    target_position_deg_ = target_position_deg;
+    target_speed_rpm_ = target_speed_rpm;
+    target_intensity_amps_ = target_intensity_amps;
 }
 
 void Motor::setTxCurrent(float amperes, uint8_t motor_id)
@@ -114,7 +125,7 @@ void Motor::setTxCurrent(float amperes, uint8_t motor_id)
 
 void Motor::handle()
 {
-    switch (controlMethod_)
+    switch (control_method_)
     {
     case ControlMethod::TARGET_POSITION:
         setPosition(target_position_deg_, feedforward_speed_rpm_, feedforward_intensity_amps_);
@@ -131,7 +142,7 @@ void Motor::setPosition(float target_position_deg, float feedforward_speed_rpm, 
 {
     target_position_deg_ = target_position_deg;
     feedforward_speed_rpm_ = feedforward_speed_rpm;
-    target_speed_rpm_ = ppid_.calc(target_position_deg_,fdb_angle_deg_) + feedforward_speed_rpm_;
+    target_speed_rpm_ = ppid_.calc(target_position_deg_,integration_angle_deg_) + feedforward_speed_rpm_;
     feedforward_intensity_amps_ = feedforward_intensity_amps;
     output_current_amps_ = spid_.calc(target_speed_rpm_,fdb_speed_rpm_) + feedforward_intensity_amps_;
     setTxCurrent(output_current_amps_ , motor_id_);

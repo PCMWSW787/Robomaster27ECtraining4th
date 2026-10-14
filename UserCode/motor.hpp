@@ -8,11 +8,25 @@
 #include "PID.hpp"
 extern uint8_t tx_data[8];
 
+enum class ControlMethod
+{
+    TARGET_POSITION,
+    TARGET_SPEED,
+    TARGET_TORQUE,
+};
+
+
+enum class MotorType
+{
+    M2006 = 10000,
+    M3508 = 16384
+};
+
 class Motor
 {
 public:
     //construct the class
-    explicit Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id);
+    explicit Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id, ControlMethod control_method, MotorType motor_type);
 
     //solve the can message
     void canRxMsgCallback(const uint8_t rx_data[8]);
@@ -34,17 +48,14 @@ public:
 
     //control module
     void handle();
+    void setTarget(float target_position_deg, float target_speed_rpm, float target_intensity_amps);
     void setSpeed(float target_speed_rpm, float feedforward_intensity_amps);
     void setPosition(float target_position_deg, float feedforward_speed_rpm, float feedforward_intensity);
     void setIntensity(float intensity);
 
 private:
     const float ratio_;
-    enum class MotorType
-    {
-        M2006 = 10000,
-        M3508 = 16384
-    }motorType_;
+    MotorType motor_type_;
 
     int16_t ecd_angle_ = 0, last_ecd_angle_ = 0;
     int16_t fdb_speed_rpm_ = 0;
@@ -60,16 +71,12 @@ private:
     void normalizeDataReceived();
 
     PID spid_, ppid_;
-    float target_position_deg_, target_speed_rpm_, target_intensity_amps_;
-    float feedforward_speed_rpm_, feedforward_intensity_amps_;
-    float output_current_amps_;
-    enum class ControlMethod{
-        TARGET_POSITION,
-        TARGET_SPEED,
-        TARGET_TORQUE,
-    } controlMethod_;
+    float target_position_deg_ = 0.0f, target_speed_rpm_ = 0.0f, target_intensity_amps_ = 0.0f;
+    float feedforward_speed_rpm_ = 0.0f, feedforward_intensity_amps_ = 0.0f;
+    float output_current_amps_ = 0.0f;
+    ControlMethod control_method_;
 
-    uint8_t motor_id_;
+    uint8_t motor_id_ = 0;
 
     static constexpr uint16_t kEncoderRange = 8192;
 };
