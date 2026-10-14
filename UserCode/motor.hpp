@@ -11,30 +11,32 @@ extern uint8_t tx_data[8];
 class Motor
 {
 public:
-    explicit Motor(const float ratio);
+    //construct the class
+    explicit Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id);
 
+    //solve the can message
     void canRxMsgCallback(const uint8_t rx_data[8]);
 
+    //apis
     float angle() const;
     int16_t speed_rpm() const;
     float currentAmps() const;
     int16_t temperatureC() const;
 
+    //output
     void setTxCurrent(float amperes, uint8_t motor_id);
 
+    //send can message
     uint8_t* getTxData();
 
-    // PID spid, ppid;
-    // float target_angle_, fdb_angle_;
-    // float target_speed_, fdb_speed_;
-    // float feedforward_speed_, feedforward_intensity_;
-    // typedef enum ControlMethod{
-    //     TARGET_POSITION,
-    //     TARGET_SPEED,
-    //     TARGET_TORQUE,
-    // } ControlMethod_e;
-    // void handle();
-    // void setSpeed(float target_speed, float feedforward_intensity);
+    //get feedback id
+    uint32_t getFeedbackId();
+
+    //control module
+    void handle();
+    void setSpeed(float target_speed, float feedforward_intensity);
+    void setPosition(float target_position, float feedforward_speed, float feedforward_intensity);
+    void setIntensity(float intensity);
 
 private:
     const float ratio_;
@@ -51,6 +53,18 @@ private:
     uint8_t tx_data_[8] = {};
 
     void normalizeDataReceived();
+
+    PID spid_, ppid_;
+    float target_angle_, fdb_angle_;
+    float target_speed_, fdb_speed_;
+    float feedforward_speed_, feedforward_intensity_;
+    enum class ControlMethod{
+        TARGET_POSITION,
+        TARGET_SPEED,
+        TARGET_TORQUE,
+    } ControlMethod_e;
+
+    uint8_t motor_id_;
 
     static constexpr uint16_t kEncoderRange = 8192;
 };

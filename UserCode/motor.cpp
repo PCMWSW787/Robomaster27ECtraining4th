@@ -8,7 +8,11 @@ extern CAN_TxHeaderTypeDef tx_header;
 extern CAN_TxHeaderTypeDef tx_header1;
 extern CAN_TxHeaderTypeDef tx_header2;
 
-Motor::Motor(const float ratio):ratio_(ratio){}
+Motor::Motor(const float ratio, PID spid, PID ppid, uint8_t motor_id)
+    :ratio_(ratio),
+    spid_(spid),
+    ppid_(ppid)
+{}
 
 float Motor::angle() const
 {
@@ -26,6 +30,11 @@ float Motor::currentAmps() const
 int16_t Motor::speed_rpm() const
 {
     return speed_rpm_;
+}
+
+uint32_t Motor::getFeedbackId()
+{
+    return 0x200 + static_cast<uint32_t>(motor_id_);
 }
 
 void Motor::normalizeDataReceived()
@@ -99,6 +108,13 @@ void Motor::setTxCurrent(float amperes, uint8_t motor_id)
     default:
         break;
     }
+}
+
+void Motor::handle()
+{
+    target_speed_ = ppid_.calc(target_angle_,angle_);
+    float out_current = spid_.calc(target_speed_,speed_rpm_);
+    setTxCurrent(out_current, motor_id_);
 }
 
 uint8_t* Motor::getTxData()
