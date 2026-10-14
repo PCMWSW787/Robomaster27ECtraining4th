@@ -34,20 +34,25 @@ public:
 
     //control module
     void handle();
-    void setSpeed(float target_speed, float feedforward_intensity);
-    void setPosition(float target_position, float feedforward_speed, float feedforward_intensity);
+    void setSpeed(float target_speed_rpm, float feedforward_intensity_amps);
+    void setPosition(float target_position_deg, float feedforward_speed_rpm, float feedforward_intensity);
     void setIntensity(float intensity);
 
 private:
     const float ratio_;
+    enum class MotorType
+    {
+        M2006 = 10000,
+        M3508 = 16384
+    }motorType_;
 
-    int16_t ecd_angle_ = 0;
-    int16_t speed_rpm_ = 0;
-    float currentA_ = 0;
+    int16_t ecd_angle_ = 0, last_ecd_angle_ = 0;
+    int16_t fdb_speed_rpm_ = 0;
+    float fdb_current_amps = 0.0f;
+    float fdb_angle_deg_ = 0.0f;
+    float integration_angle_deg_ = 0.0f;
     int16_t tempC_ = 0;
 
-    float angle_ = 0;
-    int16_t last_ecd_ = 0;
     // bool received_ = false;
 
     uint8_t tx_data_[8] = {};
@@ -55,14 +60,14 @@ private:
     void normalizeDataReceived();
 
     PID spid_, ppid_;
-    float target_angle_, fdb_angle_;
-    float target_speed_, fdb_speed_;
-    float feedforward_speed_, feedforward_intensity_;
+    float target_position_deg_, target_speed_rpm_, target_intensity_amps_;
+    float feedforward_speed_rpm_, feedforward_intensity_amps_;
+    float output_current_amps_;
     enum class ControlMethod{
         TARGET_POSITION,
         TARGET_SPEED,
         TARGET_TORQUE,
-    } ControlMethod_e;
+    } controlMethod_;
 
     uint8_t motor_id_;
 

@@ -14,7 +14,8 @@ public:
     float calc(float ref, float fdb);
 private:
     float kp_, ki_, kd_;
-    float i_max_, out_max_, d_filter_k_;
+    float integration_max_, output_current_max_, d_filter_k_;
+    float pout_ = 0.0f, dout_ = 0.0f, iout_ = 0.0f;
     float err_ = 0.0f, last_err_ = 0.0f, err_sum_ = 0.0f;
     float last_dout_ = 0.0f;
 };
