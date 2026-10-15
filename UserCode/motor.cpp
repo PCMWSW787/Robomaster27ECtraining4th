@@ -162,6 +162,13 @@ void Motor::setIntensity(float target_intensity_amps)
     setTxCurrent(target_intensity_amps_, motor_id_);
 }
 
+
+void Motor::setFeedforward(float feedforward_speed_rpm, float feedforward_intensity_amps)
+{
+    feedforward_speed_rpm_ = feedforward_speed_rpm;
+    feedforward_intensity_amps_ = feedforward_intensity_amps;
+}
+
 uint8_t* Motor::getTxData()
 {
     return tx_data_;

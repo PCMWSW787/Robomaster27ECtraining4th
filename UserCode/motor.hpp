@@ -51,6 +51,7 @@ public:
     void setTarget(float target_position_deg, float target_speed_rpm, float target_intensity_amps);
     void setSpeed(float target_speed_rpm, float feedforward_intensity_amps);
     void setPosition(float target_position_deg, float feedforward_speed_rpm, float feedforward_intensity);
+    void setFeedforward(float feedforward_speed_rpm, float feedforward_intensity_amps);
     void setIntensity(float intensity);
 
 private:
